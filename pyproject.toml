@@ -1,0 +1,23 @@
+[project]
+name = "synthesis-bench-public"
+version = "0.1.0"
+description = "Task contracts, deterministic verifiers, and a synthetic demo set for evidence-synthesis benchmarking."
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+testpaths = [
+    "scripts/tests",
+    "tasks/title_abstract_screening/tests",
+    "tasks/full_text_screening/tests",
+    "tasks/full_text_extraction/tests",
+    "tasks/full_text_extraction/grader/tests",
+    "tasks/risk_of_bias/tests",
+    "tasks/meta_analysis/tests",
+]

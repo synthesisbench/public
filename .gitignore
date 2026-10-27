@@ -1,0 +1,14 @@
+# Harbor writes jobs/ into whatever directory you run it from.
+jobs/
+
+__pycache__/
+.pytest_cache/
+.venv/
+.DS_Store
+.claude/goals/
+.codex/goals/
+
+# Answer keys, corpora, and runs live in the private monorepo, not here.
+# Only the agent-facing RoB guidance ships.
+datasets/metapsy/*
+!datasets/metapsy/resources/

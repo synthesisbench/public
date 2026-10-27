@@ -1,0 +1,41 @@
+schema_version = "1.3"
+artifacts = ["/task/decisions.json"]
+
+[task]
+name = "synthesis-bench/full-text-screening"
+description = "Full-text screening task: decide which candidate studies are included after full-text assessment. Human references and grader live verifier-side only."
+keywords = ["systematic-review", "cochrane", "full-text-screening", "screening", "harbor"]
+[[task.authors]]
+name = "knrz"
+email = "knouroozi@gmail.com"
+
+[metadata]
+difficulty = "medium"
+category = "machine-learning"
+multi_step_reward_strategy = "mean"
+
+[agent]
+timeout_sec = 1800.0
+network_mode = "public"
+
+[verifier]
+timeout_sec = 300.0
+network_mode = "public"
+environment_mode = "separate"
+
+[verifier.environment]
+network_mode = "public"
+build_timeout_sec = 600.0
+os = "linux"
+
+[environment]
+network_mode = "public"
+build_timeout_sec = 600.0
+os = "linux"
+
+[[steps]]
+name = "screen"
+[steps.agent]
+timeout_sec = 1800.0
+[steps.verifier]
+timeout_sec = 300.0
