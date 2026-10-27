@@ -105,7 +105,9 @@ class GoldFact(BaseModel):
     study_id: str
     data_type: ArmDataType
     canonical_outcome: str
-    values: dict[str, int | float]
+    # A continuous fact may carry a null SD when the review entered none; see
+    # _null_sd_mismatch for how it pairs.
+    values: dict[str, int | float | None]
     slots: list[dict[str, Any]] = Field(default_factory=list)
     kind: str = "plain"
     detail_labels: list[str] = Field(default_factory=list)
@@ -461,13 +463,31 @@ def _diff_count(pred: ArmFact, human: GoldFact | ArmFact, tol: Tol) -> int | Non
     integer otherwise: 0 = exact recovery, 1 = all-but-one contradiction, >=2 =
     distinct outcomes.
     """
-    if pred.data_type != human.data_type:
+    if pred.data_type != human.data_type or _null_sd_mismatch(pred, human):
         return None
     human_fields = _human_field_names(human)
     pred_fields = set(_pred_field_names(pred))
     if not human_fields or not pred_fields.issuperset(human_fields):
         return None
     return sum(1 for f in human_fields if not _field_equal(pred, human, f, tol))
+
+
+def _null_sd_mismatch(pred: ArmFact, human: GoldFact | ArmFact) -> bool:
+    """A null gold SD pairs only with a null predicted SD.
+
+    Mirrors the Cochrane grader: null matches null, and a number against a null
+    (either way round) means the rows are not the same fact. A numeric gold SD
+    against a null prediction is already excluded by the comparable-fields check
+    in _diff_count; this covers the converse.
+    """
+    if not isinstance(human, GoldFact):
+        return False
+    return any(
+        field in human.values
+        and human.values[field] is None
+        and getattr(pred, field) is not None
+        for field in ("experimental_sd", "control_sd")
+    )
 
 
 @dataclass(frozen=True)

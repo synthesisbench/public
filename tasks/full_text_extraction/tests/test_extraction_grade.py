@@ -568,6 +568,42 @@ def test_continuous_wrong_integer_n_contradiction():
     )
 
 
+# --- null SDs (owner ruling 2026-10-26) -----------------------------------
+
+
+def _continuous_fact(esd, csd):
+    return GoldFact(
+        study_id="A",
+        canonical_outcome="Pain",
+        data_type="continuous",
+        values={
+            "experimental_mean": 4.2,
+            "experimental_sd": esd,
+            "experimental_n": 20,
+            "control_mean": 5.0,
+            "control_sd": csd,
+            "control_n": 22,
+        },
+    )
+
+
+def test_null_gold_sd_recovers_with_null_predicted_sd():
+    s = grade([C("A", 4.2, None, 20, 5.0, None, 22)], [_continuous_fact(None, None)])
+    assert s["recovered"] == 1 and s["reward"] == 1.0, s
+
+
+def test_numeric_predicted_sd_against_null_gold_sd_is_not_the_same_fact():
+    s = grade([C("A", 4.2, 1.1, 20, 5.0, None, 22)], [_continuous_fact(None, None)])
+    assert s["recovered"] == 0 and s["contradicted"] == 0, s
+    assert s["missing"] == 1 and s["extras"] == 1 and s["reward"] == 0.0, s
+
+
+def test_null_predicted_sd_against_numeric_gold_sd_is_not_the_same_fact():
+    s = grade([C("A", 4.2, None, 20, 5.0, 1.3, 22)], [_continuous_fact(1.1, 1.3)])
+    assert s["recovered"] == 0 and s["contradicted"] == 0, s
+    assert s["missing"] == 1 and s["extras"] == 1 and s["reward"] == 0.0, s
+
+
 # --- population-aware denominator recovery --------------------------------
 
 
